@@ -11,6 +11,11 @@ import { ChatsModule } from './chats/chats.module';
 import { MessagesModule } from './messages/messages.module';
 import { MessagesGateway } from './messages/messages.gateway';
 import { JwtService } from '@nestjs/jwt';
+import { StorageModule } from './storage/storage.module';
+import { GlobalFilter } from './global/global.filter';
+import { NotificationsModule } from './notifications/notifications.module';
+import { ClientModule } from './client.module';
+import { S3Module } from './aws/s3.module';
 
 @Module({
 	imports: [
@@ -25,13 +30,30 @@ import { JwtService } from '@nestjs/jwt';
 			inject: [ConfigService]
 		}),
 		AuthModule,
+		ClientModule,
 		UserModule,
 		ProfileModule,
 		FriendsModule,
 		ChatsModule,
-		MessagesModule
+		MessagesModule,
+		StorageModule,
+		NotificationsModule
 	],
+	exports: [],
 	controllers: [],
-	providers: [MessagesGateway, JwtService]
+	providers: [
+		MessagesGateway,
+		JwtService,
+		GlobalFilter
+		// {
+		// 	provide: 'socket_service',
+		// 	useFactory: () => {
+		// 		return ClientProxyFactory.create({
+		// 			transport: Transport.TCP,
+		// 			options: { port: 4001 }
+		// 		});
+		// 	}
+		// }
+	]
 })
 export class AppModule {}

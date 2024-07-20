@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import * as process from 'process';
 import { Profile } from '../profile/profile.entity';
 import { InjectRepository } from '@nestjs/typeorm';

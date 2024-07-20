@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { Messages } from '../messages/messages.entity';
 import { User } from '../user/user.entity';
+import { Notifications } from '../notifications/notifications.entity';
 
 @Entity('chats')
 export class Chats {
@@ -22,6 +23,11 @@ export class Chats {
 
 	@ManyToOne(() => User, user => user.id, { onDelete: 'CASCADE' })
 	to_user: User;
+
+	@OneToMany(() => Notifications, notification => notification.chat, {
+		onDelete: 'CASCADE'
+	})
+	notifications: Notifications[];
 
 	@CreateDateColumn()
 	created_at: Date;

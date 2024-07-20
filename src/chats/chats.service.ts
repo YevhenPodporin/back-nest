@@ -53,7 +53,7 @@ export class ChatsService {
 			const nweChat = this.manager.create(Chats, fromUserToUser);
 			existingChat = await this.manager.save(nweChat);
 		}
-		return existingChat;
+		return { chat: existingChat };
 	}
 
 	async getChatList(userId: User['id']): Promise<ChatListDto[]> {
@@ -62,34 +62,36 @@ export class ChatsService {
 			relations: [
 				'to_user.profile',
 				'from_user.profile',
-				'messages'
-				// 'notifications'
+				'messages',
+				'notifications'
 			],
 			order: {
 				messages: { created_at: 'DESC' }
 			}
 		});
 
-		return list.map(item => ({
-			id: item.id,
-			from_user: {
-				profile: {
-					...item.from_user.profile,
-					file_path: getImageUrl(item.from_user.profile?.file_path)
-				}
-			},
-			to_user: {
-				profile: {
-					...item.to_user.profile,
-					file_path: getImageUrl(item.to_user.profile?.file_path)
-				}
-			},
-			to_user_id: item.to_user.id,
-			from_user_id: item.from_user.id,
-			unread_messages: 0,
-			last_message: item.messages[0]?.message,
-			created_at: item.created_at,
-			updated_at: item.updated_at
-		}));
+		return list.map(item => {
+			return {
+				id: item.id,
+				from_user: {
+					profile: {
+						...item.from_user.profile,
+						file_path: getImageUrl(item.from_user.profile?.file_path)
+					}
+				},
+				to_user: {
+					profile: {
+						...item.to_user.profile,
+						file_path: getImageUrl(item.to_user.profile?.file_path)
+					}
+				},
+				to_user_id: item.to_user.id,
+				from_user_id: item.from_user.id,
+				unread_messages: item.notifications[0]?.unread_messages || 0,
+				last_message: item.messages[0]?.message,
+				created_at: item.created_at,
+				updated_at: item.updated_at
+			};
+		});
 	}
 }

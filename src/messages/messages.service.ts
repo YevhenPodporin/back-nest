@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { DataSource, SelectQueryBuilder } from 'typeorm';
 import { Messages } from './messages.entity';
 import { Chats } from '../chats/chats.entity';
@@ -9,10 +9,15 @@ import {
 	GetMessages,
 	searchMessages
 } from './types';
+import { ClientProxy } from '@nestjs/microservices';
+import { lastValueFrom } from 'rxjs';
 
 @Injectable()
 export class MessagesService {
-	constructor(private readonly dataSource: DataSource) {}
+	constructor(
+		private readonly dataSource: DataSource,
+		@Inject('microservice_b') private readonly client: ClientProxy
+	) {}
 
 	async createMessageInChat(data: CreateMessageType<string>) {
 		const message = this.dataSource.getRepository(Messages).create({
@@ -22,10 +27,25 @@ export class MessagesService {
 			file: data.file,
 			sender: { id: data.sender_id }
 		});
-		return await this.dataSource.getRepository(Messages).save(message);
+		const savedMessage = await this.dataSource
+			.getRepository(Messages)
+			.save(message);
+
+		return {
+			...savedMessage,
+			file: getImageUrl(message.file),
+			sender_id: savedMessage.sender.id
+		};
 	}
 
 	async getMessagesInChat(params: GetMessages) {
+		try {
+			const result = await lastValueFrom(this.client.send('sum', [1, 2]));
+			console.log({ result });
+		} catch (e) {
+			console.log(e);
+		}
+
 		const { chat_id, pagination, user } = params;
 		const chat = await this.dataSource.manager.findOne(Chats, {
 			where: [
@@ -38,15 +58,18 @@ export class MessagesService {
 		const [messages, count] = await this.dataSource.manager.findAndCount(
 			Messages,
 			{
+				order: { id: 'DESC' },
 				where: { chat: { id: chat_id } },
 				take: pagination.take,
-				skip: pagination.skip
+				skip: pagination.skip,
+				relations: ['sender']
 			}
 		);
 
 		return {
 			list: messages.map(msg => ({
 				...msg,
+				sender_id: msg.sender.id,
 				file: getImageUrl(msg.file)
 			})),
 			count

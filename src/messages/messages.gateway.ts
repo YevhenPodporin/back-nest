@@ -6,7 +6,7 @@ import {
 	OnGatewayDisconnect
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { UseGuards } from '@nestjs/common';
+import { Inject, UseGuards } from '@nestjs/common';
 import { JwtAuthGuardGateway } from '../auth/jwt.gateway-guards';
 import { MessagesService } from './messages.service';
 import {
@@ -17,7 +17,9 @@ import {
 	FileFromMessage
 } from './types';
 import { Chats } from '../chats/chats.entity';
-import { saveFileForMessage } from '../helpers/filesHelper';
+import { StorageService } from '../storage/storage.service';
+import { NotificationsService } from '../notifications/notifications.service';
+import { ClientProxy } from '@nestjs/microservices';
 
 interface SocketWithUser extends Socket {
 	user: JwtPayload;
@@ -33,7 +35,11 @@ interface SocketWithUser extends Socket {
 export class MessagesGateway
 	implements OnGatewayConnection, OnGatewayDisconnect
 {
-	constructor(private readonly messageService: MessagesService) {}
+	constructor(
+		private readonly messageService: MessagesService,
+		private storageService: StorageService,
+		private notificationService: NotificationsService
+	) {}
 	@WebSocketServer()
 	server: Server;
 
@@ -49,10 +55,8 @@ export class MessagesGateway
 	@SubscribeMessage('joinRoom')
 	async joinRoom(client: SocketWithUser, { id }: Pick<Chats, 'id'>) {
 		const foundRoom = await this.messageService.findChat(id);
-		// console.log({ foundRoom, id });
 		if (foundRoom) {
 			client.join(String(foundRoom.id));
-			console.log(`Client ${client.id} joined room ${foundRoom.id}`);
 		} else {
 			client.disconnect(true);
 		}
@@ -67,6 +71,14 @@ export class MessagesGateway
 			...data,
 			user: client.user
 		});
+
+		if (data.pagination?.skip === 0) {
+			await this.notificationService.removeNotification({
+				to_chat_id: Number(data.chat_id),
+				to_user_id: client.user.id
+			});
+		}
+
 		return messages;
 	}
 
@@ -90,7 +102,7 @@ export class MessagesGateway
 		data: CreateMessageType<FileFromMessage>
 	) {
 		try {
-			const savedFileName = saveFileForMessage(data.file);
+			const savedFileName = this.storageService.saveFileForMessage(data.file);
 			const savedMessage = await this.messageService.createMessageInChat({
 				...data,
 				file: savedFileName,
@@ -105,9 +117,14 @@ export class MessagesGateway
 					!socketToSend ||
 					(!socketToSend.rooms.has(String(data.chat_id)) && toUserId)
 				) {
+					const notification = await this.notificationService.addNotification({
+						to_user_id: toUserId,
+						to_chat_id: chat.id
+					});
+
 					this.server
 						.to(String(socketToSend.id))
-						.emit('notification', { message: data.message, ...savedMessage });
+						.emit('notification', { message: data.message, ...notification });
 				}
 			}
 

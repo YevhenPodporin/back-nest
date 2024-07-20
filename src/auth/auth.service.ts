@@ -92,8 +92,8 @@ export class AuthService {
 			where: {
 				email: dto.email
 			},
-			relations: { profile: true },
-			select: ['password', 'id']
+			relations: ['profile'],
+			select: { password: true, id: true }
 		});
 
 		if (!user) throw new BadRequestException('User not found');

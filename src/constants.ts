@@ -17,5 +17,6 @@ export const VALID_FILE_TYPES_FOR_CHAT = [
 	'jpeg',
 	'png',
 	'mp3',
+	'mp4',
 	'webm'
 ];
