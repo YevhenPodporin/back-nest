@@ -10,6 +10,7 @@ import { UserService } from '../user/user.service';
 import { User } from '../user/user.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Profile } from '../profile/profile.entity';
+import { ClientModule } from '../client.module';
 
 @Module({
 	controllers: [AuthController],
@@ -17,6 +18,7 @@ import { Profile } from '../profile/profile.entity';
 	imports: [
 		TypeOrmModule.forFeature([User, Profile]),
 		PassportModule,
+		ClientModule,
 		JwtModule.registerAsync({
 			inject: [ConfigService],
 			useFactory: getJwtConfig

@@ -55,7 +55,7 @@ describe('AuthController', () => {
 		const deletedUser = await userService.deleteUser(
 			registeredUser.user.user_id
 		);
-		console.log(deletedUser);
+
 		// expect(deletedUser.id).toEqual(registeredUser.user.id);
 	});
 });

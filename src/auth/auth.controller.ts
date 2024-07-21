@@ -13,7 +13,6 @@ import { UserRegisterDto } from './dto/user-register.dto';
 import { FileInterceptor } from '@nestjs/platform-express/multer';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { IsValidImageDecorator } from '../decorators/is-valid-image.decorator';
-import { UserWithProfileResponse } from '../user/types';
 import { Request, Response } from 'express';
 import { ACCESS_TOKEN } from '../constants';
 
@@ -30,7 +29,7 @@ export class AuthController {
 		@IsValidImageDecorator()
 		file: Express.Multer.File,
 		@Body() body: UserRegisterDto
-	): Promise<UserWithProfileResponse> {
+	) {
 		return this.authService.register({ file, body });
 	}
 
@@ -53,3 +52,5 @@ export class AuthController {
 		res.send({ message: 'Signed out successfully' });
 	}
 }
+
+//TODO при регистрации ошибка field name (скорее всего файл)

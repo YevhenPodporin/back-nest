@@ -7,6 +7,7 @@ import { UserService } from '../user/user.service';
 import { GetUsersDto } from './dto/friends.dto';
 import { ClientProxy } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
+import { AWS_SERVICE_NAME } from '../constants';
 
 @Injectable()
 export class FriendsService {
@@ -15,7 +16,7 @@ export class FriendsService {
 	constructor(
 		private readonly userService: UserService,
 		private readonly dataSource: DataSource,
-		@Inject('microservice_b') private readonly client: ClientProxy
+		@Inject(AWS_SERVICE_NAME) private readonly client: ClientProxy
 	) {
 		this.manager = dataSource.manager;
 	}

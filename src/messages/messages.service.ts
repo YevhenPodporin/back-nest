@@ -9,15 +9,10 @@ import {
 	GetMessages,
 	searchMessages
 } from './types';
-import { ClientProxy } from '@nestjs/microservices';
-import { lastValueFrom } from 'rxjs';
 
 @Injectable()
 export class MessagesService {
-	constructor(
-		private readonly dataSource: DataSource,
-		@Inject('microservice_b') private readonly client: ClientProxy
-	) {}
+	constructor(private readonly dataSource: DataSource) {}
 
 	async createMessageInChat(data: CreateMessageType<string>) {
 		const message = this.dataSource.getRepository(Messages).create({
@@ -39,13 +34,6 @@ export class MessagesService {
 	}
 
 	async getMessagesInChat(params: GetMessages) {
-		try {
-			const result = await lastValueFrom(this.client.send('sum', [1, 2]));
-			console.log({ result });
-		} catch (e) {
-			console.log(e);
-		}
-
 		const { chat_id, pagination, user } = params;
 		const chat = await this.dataSource.manager.findOne(Chats, {
 			where: [

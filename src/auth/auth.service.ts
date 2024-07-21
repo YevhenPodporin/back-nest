@@ -1,5 +1,6 @@
 import {
 	BadRequestException,
+	Inject,
 	Injectable,
 	UnauthorizedException
 } from '@nestjs/common';
@@ -15,21 +16,25 @@ import { User } from '../user/user.entity';
 import { DataSource } from 'typeorm';
 import { Profile } from '../profile/profile.entity';
 import { Tokens } from './types';
-import { UserWithProfileResponse } from '../user/types';
 import { Response, Request } from 'express';
 import {
 	ACCESS_EXPIRE_TIME,
 	ACCESS_TOKEN,
+	AWS_SERVICE_NAME,
 	REFRESH_EXPIRE_TIME,
 	REFRESH_TOKEN
 } from '../constants';
+import { ClientProxy } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class AuthService {
 	constructor(
 		private jwt: JwtService,
 		private userService: UserService,
-		private readonly dataSource: DataSource
+		private readonly dataSource: DataSource,
+		@Inject(AWS_SERVICE_NAME)
+		private readonly client: ClientProxy
 	) {}
 
 	async register({
@@ -38,13 +43,13 @@ export class AuthService {
 	}: {
 		file?: Express.Multer.File;
 		body: UserRegisterDto;
-	}): Promise<UserWithProfileResponse> {
+	}) {
 		const isExistUser = await this.dataSource.manager.findOne(User, {
 			where: { email: body.email }
 		});
 		if (isExistUser) throw new BadRequestException('User already exists');
 		let newFileName = '';
-
+		let fileUrl = '';
 		if (file) {
 			newFileName =
 				new Date().toISOString().replace(/:/g, '-').replace(/\./g, '-') +
@@ -54,6 +59,12 @@ export class AuthService {
 			if (!fs.existsSync(uploadDir)) {
 				fs.mkdirSync(uploadDir, { recursive: true });
 			}
+			fileUrl = await firstValueFrom(
+				this.client.send('saveFile', {
+					data: file,
+					filePath: `user/${newFileName}`
+				})
+			);
 
 			fs.writeFile(
 				path.join(uploadDir, newFileName),
@@ -79,10 +90,13 @@ export class AuthService {
 
 		userToCreate = await this.dataSource.manager.save(userToCreate);
 
-		const tokens = await this.issueTokens(userToCreate.id);
+		const tokens = this.issueTokens(userToCreate.id);
 
 		return {
-			user: this.userService.transformUserWIthProfile(userToCreate),
+			user: this.userService.transformUserWIthProfile({
+				...userToCreate,
+				fileUrl
+			}),
 			...tokens
 		};
 	}

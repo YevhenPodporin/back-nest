@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import * as process from 'process';
 import { Profile } from '../profile/profile.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -10,6 +10,7 @@ import * as path from 'path';
 
 interface UserWithProfile extends User {
 	profile: Profile;
+	fileUrl?: string;
 }
 
 @Injectable()
@@ -73,7 +74,7 @@ export class UserService {
 			date_of_birth: user.profile.date_of_birth,
 			file_path:
 				user.profile.file_path &&
-				process.env['BACKEND_IMAGE_URL'] + user.profile.file_path,
+				`http://localhost:4566/chat-media/${user.profile.file_path}`,
 			is_online: user.profile.is_online,
 			updated_at: user.profile.updated_at,
 			created_at: user.profile.created_at

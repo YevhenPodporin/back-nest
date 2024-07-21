@@ -20,3 +20,4 @@ export const VALID_FILE_TYPES_FOR_CHAT = [
 	'mp4',
 	'webm'
 ];
+export const AWS_SERVICE_NAME = 'aws_microservice';

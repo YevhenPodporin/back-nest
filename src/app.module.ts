@@ -15,7 +15,6 @@ import { StorageModule } from './storage/storage.module';
 import { GlobalFilter } from './global/global.filter';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ClientModule } from './client.module';
-import { S3Module } from './aws/s3.module';
 
 @Module({
 	imports: [
