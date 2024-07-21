@@ -5,6 +5,7 @@ import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 export const IsValidImageDecorator = createParamDecorator(
 	(data: unknown, ctx: ExecutionContext) => {
 		const file = ctx.switchToHttp().getRequest().file;
+		console.log('File in decorator:', file); // Логирование для проверки
 
 		if (!file) return null;
 

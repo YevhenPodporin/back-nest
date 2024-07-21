@@ -39,10 +39,12 @@ export class AuthService {
 
 	async register({
 		file,
-		body
+		body,
+		res
 	}: {
 		file?: Express.Multer.File;
 		body: UserRegisterDto;
+		res: Response;
 	}) {
 		const isExistUser = await this.dataSource.manager.findOne(User, {
 			where: { email: body.email }
@@ -50,6 +52,7 @@ export class AuthService {
 		if (isExistUser) throw new BadRequestException('User already exists');
 		let newFileName = '';
 		let fileUrl = '';
+
 		if (file) {
 			newFileName =
 				new Date().toISOString().replace(/:/g, '-').replace(/\./g, '-') +
@@ -91,7 +94,7 @@ export class AuthService {
 		userToCreate = await this.dataSource.manager.save(userToCreate);
 
 		const tokens = this.issueTokens(userToCreate.id);
-
+		await this.setCookies(tokens, res);
 		return {
 			user: this.userService.transformUserWIthProfile({
 				...userToCreate,

@@ -26,7 +26,7 @@ export class UserRegisterDto {
 	@IsDateString({}, { message: INCORRECT_DATE_FORMAT })
 	date_of_birth: Profile['date_of_birth'];
 
-	@IsOptional()
-	@ApiProperty({ type: 'string', format: 'binary', required: false })
-	file?: Express.Multer.File;
+	// @IsOptional()
+	// @ApiProperty({ type: 'string', format: 'binary', required: false })
+	// file?: Express.Multer.File;
 }

@@ -25,12 +25,13 @@ export class AuthController {
 	@Post('/register')
 	@UseInterceptors(FileInterceptor('file'))
 	register(
-		@UploadedFile()
 		@IsValidImageDecorator()
+		@UploadedFile()
 		file: Express.Multer.File,
-		@Body() body: UserRegisterDto
+		@Body() body: UserRegisterDto,
+		@Res({ passthrough: true }) res: Response
 	) {
-		return this.authService.register({ file, body });
+		return this.authService.register({ file, body, res });
 	}
 
 	@Post('/login')
