@@ -92,15 +92,13 @@ export class AuthService {
 		});
 
 		userToCreate = await this.dataSource.manager.save(userToCreate);
-
 		const tokens = this.issueTokens(userToCreate.id);
 		await this.setCookies(tokens, res);
 		return {
 			user: this.userService.transformUserWIthProfile({
 				...userToCreate,
 				fileUrl
-			}),
-			...tokens
+			})
 		};
 	}
 
@@ -110,7 +108,7 @@ export class AuthService {
 				email: dto.email
 			},
 			relations: ['profile'],
-			select: { password: true, id: true }
+			select: { password: true, id: true, email: true }
 		});
 
 		if (!user) throw new BadRequestException('User not found');
@@ -140,7 +138,7 @@ export class AuthService {
 	}
 
 	private issueTokens(userId: User['id']): Tokens {
-		const data = { id: userId };
+		const data = { id: userId, iat: new Date().getTime() };
 		const accessToken = this.jwt.sign(data, {
 			expiresIn: ACCESS_EXPIRE_TIME
 		});

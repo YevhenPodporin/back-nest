@@ -1,0 +1,14 @@
+version: '3'
+services:
+  db:
+    image: mysql:8.3.0
+    restart: always
+    container_name: test_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 1995
+    ports:
+      - "3306:3306"
+    volumes:
+      - local-db-data:/var/lib/mysql
+volumes:
+  local-db-data:

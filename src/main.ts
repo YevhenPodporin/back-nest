@@ -3,9 +3,9 @@ import { AppModule } from './app.module';
 import { join } from 'path';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
-import * as cookieParser from 'cookie-parser';
 import * as dotenv from 'dotenv';
 import { GlobalFilter } from './global/global.filter';
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
 	const app = await NestFactory.create<NestApplication>(AppModule, {
@@ -22,16 +22,15 @@ async function bootstrap() {
 	app.useGlobalFilters(new GlobalFilter());
 
 	const config = new DocumentBuilder()
-		.addBearerAuth()
 		.setTitle('Chat app')
 		.setDescription('Nest api for chat application')
 		.setVersion('1.0')
 		.build();
 
 	const document = SwaggerModule.createDocument(app, config);
-	SwaggerModule.setup('api', app, document);
-	await app.listen(4000);
-	console.log('...Listening port: 4000');
+	SwaggerModule.setup('api/swagger', app, document);
+	await app.listen(process.env.PORT || 4000);
+	console.log('...Listening port:' + process.env.PORT || 4000);
 }
 
 bootstrap();

@@ -1,9 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import * as process from 'process';
 import { Profile } from '../profile/profile.entity';
-import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { UserWithProfileResponse } from './types';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -15,14 +13,10 @@ interface UserWithProfile extends User {
 
 @Injectable()
 export class UserService {
-	constructor(
-		@InjectRepository(User)
-		private usersRepository: Repository<User>,
-		private readonly dataSource: DataSource
-	) {}
+	constructor(private readonly dataSource: DataSource) {}
 
 	async getProfile(userId: User['id']) {
-		const user = await this.usersRepository.findOne({
+		const user = await this.dataSource.manager.findOne(User, {
 			where: {
 				id: userId
 			},
@@ -52,11 +46,11 @@ export class UserService {
 	}
 
 	async findOne(userId: User['id']) {
-		return this.usersRepository.findOneBy({ id: userId });
+		return this.dataSource.manager.findOneBy(User, { id: userId });
 	}
 
 	async getUserPayload(userId: User['id']) {
-		return this.usersRepository.findOne({
+		return this.dataSource.manager.findOne(User, {
 			where: { id: userId },
 			select: { email: true, id: true }
 		});

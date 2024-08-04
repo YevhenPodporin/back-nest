@@ -19,7 +19,10 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "prepare": "husky",
-    "migration:generate": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli migration:generate -d ./ormconfig.ts ./src/database/migrations/MyNewMigration"
+    "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
+    "typeorm:run": "npx typeorm-ts-node-commonjs migration:run -d ./ormconfig.ts",
+    "typeorm:generate-win": "npx typeorm-ts-node-commonjs migration:generate -d ./ormconfig.ts src/database/migrations/%npm_config_name%",
+    "typeorm:generate": "npx ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:generate -d ./ormconfig.ts src/database/migrations/$npm_config_name"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.616.0",
@@ -47,7 +50,6 @@
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
-    "testcontainers": "^10.10.3",
     "typeorm": "^0.3.20"
   },
   "devDependencies": {
@@ -71,7 +73,8 @@
     "jest": "^29.5.0",
     "prettier": "^3.0.0",
     "source-map-support": "^0.5.21",
-    "supertest": "^6.3.3",
+    "supertest": "^6.3.4",
+    "testcontainers": "^10.11.0",
     "ts-jest": "^29.1.0",
     "ts-loader": "^9.4.3",
     "ts-node": "^10.9.1",

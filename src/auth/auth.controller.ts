@@ -14,7 +14,7 @@ import { FileInterceptor } from '@nestjs/platform-express/multer';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { IsValidImageDecorator } from '../decorators/is-valid-image.decorator';
 import { Request, Response } from 'express';
-import { ACCESS_TOKEN } from '../constants';
+import { ACCESS_TOKEN, REFRESH_TOKEN } from '../constants';
 
 @ApiTags('Authenticate')
 @Controller('auth')
@@ -47,9 +47,11 @@ export class AuthController {
 		return this.authService.getNewTokens(req, res);
 	}
 
-	@Post('/sign_out')
+	@Post('/sign-out')
 	signOut(@Res() res: Response) {
-		res.cookie(ACCESS_TOKEN, '', { expires: new Date() });
+		res.clearCookie(ACCESS_TOKEN, { maxAge: -1 });
+		res.clearCookie(REFRESH_TOKEN, { maxAge: -1 });
+
 		res.send({ message: 'Signed out successfully' });
 	}
 }

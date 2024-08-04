@@ -1,7 +1,9 @@
 import { Controller, Delete, Get, Request } from '@nestjs/common';
 import { UserService } from './user.service';
 import { Auth } from '../decorators/auth.decorator';
+import { ApiBasicAuth } from '@nestjs/swagger';
 
+@ApiBasicAuth()
 @Auth()
 @Controller('user')
 export class UserController {

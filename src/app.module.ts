@@ -23,9 +23,20 @@ import { ClientModule } from './client.module';
 			isGlobal: true
 		}),
 		TypeOrmModule.forRootAsync({
-			useFactory: (
-				configService: ConfigService<{ database: DataSourceOptions }>
-			) => configService.get('database'),
+			useFactory: () => ({
+				type: 'mysql',
+				host: process.env.DATABASE_HOST,
+				port: Number(process.env.DATABASE_PORT),
+				username: process.env.DATABASE_USERNAME,
+				password: process.env.DATABASE_PASSWORD,
+				database: process.env.DATABASE_NAME,
+				synchronize: false,
+				migrations: [__dirname + '/database/migrations/*{.ts,.js}'],
+				entities: [__dirname + '/**/*.entity{.ts,.js}'],
+				cli: {
+					migrationsDir: 'src/database/migrations'
+				}
+			}),
 			inject: [ConfigService]
 		}),
 		AuthModule,
@@ -40,19 +51,6 @@ import { ClientModule } from './client.module';
 	],
 	exports: [],
 	controllers: [],
-	providers: [
-		MessagesGateway,
-		JwtService,
-		GlobalFilter
-		// {
-		// 	provide: 'socket_service',
-		// 	useFactory: () => {
-		// 		return ClientProxyFactory.create({
-		// 			transport: Transport.TCP,
-		// 			options: { port: 4001 }
-		// 		});
-		// 	}
-		// }
-	]
+	providers: [MessagesGateway, JwtService, GlobalFilter]
 })
 export class AppModule {}
