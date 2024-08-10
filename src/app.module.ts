@@ -6,7 +6,6 @@ import { ProfileModule } from './profile/profile.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { FriendsModule } from './friends/friends.module';
 import DbConfig from './config/database.config';
-import { DataSourceOptions } from 'typeorm';
 import { ChatsModule } from './chats/chats.module';
 import { MessagesModule } from './messages/messages.module';
 import { MessagesGateway } from './messages/messages.gateway';
@@ -32,10 +31,7 @@ import { ClientModule } from './client.module';
 				database: process.env.DATABASE_NAME,
 				synchronize: false,
 				migrations: [__dirname + '/database/migrations/*{.ts,.js}'],
-				entities: [__dirname + '/**/*.entity{.ts,.js}'],
-				cli: {
-					migrationsDir: 'src/database/migrations'
-				}
+				entities: [__dirname + '/**/*.entity{.ts,.js}']
 			}),
 			inject: [ConfigService]
 		}),

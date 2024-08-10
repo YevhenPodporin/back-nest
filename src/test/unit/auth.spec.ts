@@ -1,24 +1,15 @@
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-// import { DataSource } from 'typeorm';
 import { createTestApp } from '../appTest.factory';
-import { faker } from '@faker-js/faker';
 import { UserRegisterDto } from '../../auth/dto/user-register.dto';
 import { ACCESS_TOKEN, REFRESH_TOKEN } from '../../constants';
+import { RegisterTestUser, userToRegister } from '../helpers';
 
-describe('AppController (e2e)', () => {
+describe('Auth controller (e2e)', () => {
 	let app: INestApplication;
 	// let dataSource: DataSource;
 	let accessTokenFromResponse: string;
 	let refreshTokenFromResponse: string;
-
-	const userToRegister: UserRegisterDto = {
-		date_of_birth: '1995-01-18',
-		password: '123',
-		email: faker.internet.email(),
-		first_name: faker.person.firstName(),
-		last_name: faker.person.lastName()
-	};
 
 	const extractValue = (token: string) => {
 		return token.split('=')[1].split(';')[0];
@@ -32,10 +23,7 @@ describe('AppController (e2e)', () => {
 	});
 
 	it('/POST register user', async () => {
-		const response = await request(app.getHttpServer())
-			.post('/api/auth/register')
-			.send(userToRegister);
-		const [accessToken, refreshToken] = response.headers['set-cookie'];
+		const { response, refreshToken, accessToken } = await RegisterTestUser(app);
 
 		expect(response.status).toBe(HttpStatus.CREATED);
 		expect(response.body.user).toEqual(
@@ -79,7 +67,6 @@ describe('AppController (e2e)', () => {
 
 		expect(accessToken).toMatch(ACCESS_TOKEN);
 		expect(refreshToken).toMatch(REFRESH_TOKEN);
-
 		expect(extractValue(accessToken)).not.toEqual(
 			extractValue(accessTokenFromResponse)
 		);
@@ -98,7 +85,20 @@ describe('AppController (e2e)', () => {
 		expect(extractValue(refreshToken)).toBeFalsy();
 	});
 
+	it('/POST delete user', async () => {
+		const response = await request(app.getHttpServer())
+			.delete('/api/user')
+			.set('Cookie', [accessTokenFromResponse, refreshTokenFromResponse]);
+
+		expect(response.status).toBe(HttpStatus.OK);
+	});
+
 	afterAll(() => {
 		app.close();
 	});
 });
+
+// TODO проерить с фронта друзей (добавление удаление список)
+//  оставшиеся тесты написать по текущему примеру
+//  Swagger - описать все виды request response обьектов для всех запросов
+//  Docker

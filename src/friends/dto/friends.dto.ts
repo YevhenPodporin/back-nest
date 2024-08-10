@@ -10,7 +10,6 @@ import { RequestStatus } from '../friends.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
-// Определите перечисления Direction и OrderBy в соответствии с вашим кодом
 enum Direction {
 	ASC = 'asc',
 	DESC = 'desc'
