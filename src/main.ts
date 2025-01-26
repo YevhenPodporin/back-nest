@@ -16,7 +16,7 @@ async function bootstrap() {
 	dotenv.config();
 	app.setGlobalPrefix('api');
 	app.use(cookieParser());
-	app.enableCors({ origin: 'http://localhost:3000', credentials: true });
+	app.enableCors({ origin: '*', credentials: true });
 	app.useGlobalPipes(new ValidationPipe({ transform: true }));
 	app.useStaticAssets(join(__dirname, '..', 'public'));
 	app.useGlobalFilters(new GlobalFilter());

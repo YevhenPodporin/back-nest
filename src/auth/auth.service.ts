@@ -14,7 +14,6 @@ import * as path from 'path';
 import { UserService } from '../user/user.service';
 import { User } from '../user/user.entity';
 import { DataSource } from 'typeorm';
-import { Profile } from '../profile/profile.entity';
 import { Tokens } from './types';
 import { Response, Request } from 'express';
 import {
@@ -78,20 +77,17 @@ export class AuthService {
 			);
 		}
 
-		let userToCreate = this.dataSource.manager.create(User, {
+		const userToCreate = await this.dataSource.manager.save(User, {
 			email: body.email,
-			password: await hash(body.password)
+			password: await hash(body.password),
+			profile: {
+				first_name: body.first_name,
+				last_name: body.last_name,
+				date_of_birth: body.date_of_birth,
+				file_path: newFileName ? `user/${newFileName}` : null,
+				is_online: true
+			}
 		});
-		userToCreate.profile = this.dataSource.manager.create(Profile, {
-			first_name: body.first_name,
-			last_name: body.last_name,
-			date_of_birth: body.date_of_birth,
-			file_path: newFileName ? `user/${newFileName}` : null,
-			is_online: true,
-			user: userToCreate
-		});
-
-		userToCreate = await this.dataSource.manager.save(userToCreate);
 		const tokens = this.issueTokens(userToCreate.id);
 		await this.setCookies(tokens, res);
 		return {

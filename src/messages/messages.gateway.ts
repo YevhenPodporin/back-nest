@@ -1,25 +1,24 @@
 import {
+	OnGatewayConnection,
+	OnGatewayDisconnect,
 	SubscribeMessage,
 	WebSocketGateway,
-	WebSocketServer,
-	OnGatewayConnection,
-	OnGatewayDisconnect
+	WebSocketServer
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Inject, UseGuards } from '@nestjs/common';
+import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuardGateway } from '../auth/jwt.gateway-guards';
 import { MessagesService } from './messages.service';
 import {
 	CreateMessageType,
+	FileFromMessage,
 	GetMessages,
 	JwtPayload,
-	SomeoneTyping,
-	FileFromMessage
+	SomeoneTyping
 } from './types';
 import { Chats } from '../chats/chats.entity';
 import { StorageService } from '../storage/storage.service';
 import { NotificationsService } from '../notifications/notifications.service';
-import { ClientProxy } from '@nestjs/microservices';
 
 interface SocketWithUser extends Socket {
 	user: JwtPayload;
@@ -160,12 +159,10 @@ export class MessagesGateway
 
 	@SubscribeMessage('searchMessages')
 	async searchMessages(client: SocketWithUser, data: any) {
-		const messages = await this.messageService.searchInChat({
+		return await this.messageService.searchInChat({
 			...data,
 			user: client.user
 		});
-
-		return messages;
 	}
 
 	@SubscribeMessage('editMessage')
